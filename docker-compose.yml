@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mariadb:11.4
+    container_name: dcim-db
+    environment:
+      MARIADB_ROOT_PASSWORD: rootCBD500
+      MARIADB_DATABASE: opendcim
+      MARIADB_USER: opendcim
+      MARIADB_PASSWORD: pwdCBD500
+    volumes:
+      - dcim-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  opendcim:
+    build:
+      context: ./opendcim-web
+      args:
+        OPENDCIM_VERSION: "23.04"
+    container_name: dcim
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8081:80"
+    environment:
+      TZ: "Asia/Taipei"
+      OPENDCIM_DB_HOST: "db"
+      OPENDCIM_DB_NAME: "opendcim"
+      OPENDCIM_DB_USER: "opendcim"
+      OPENDCIM_DB_PASS: "pwdCBD500"
+
+    volumes:
+      - dcim-assets:/var/www/html/assets
+    restart: unless-stopped
+
+volumes:
+  dcim-db:
+  dcim-assets:
+
