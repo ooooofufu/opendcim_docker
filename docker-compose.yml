@@ -34,8 +34,16 @@ services:
       OPENDCIM_DB_USER: "opendcim"
       OPENDCIM_DB_PASS: "pwdCBD500"
 
+    devices:
+      - /dev/ipmi0:/dev/ipmi0
+    # container could access /dev/ipmi0
+    group_add:
+      - "0"
+
     volumes:
       - dcim-assets:/var/www/html/assets
+      - ./persist/apache/.htpasswd:/etc/apache2/.htpasswd:ro
+      - ./persist/opendcim/db.inc.php:/var/www/html/db.inc.php:rw
     restart: unless-stopped
 
 volumes:
